@@ -71,7 +71,7 @@ Cube.prototype = {
             let p = this.vertices[index];
 
             let x = (p.x - this.x) * cosine - (p.y - this.y) *  sine;
-            let y = (p.x - this.x) * sine - (p.y - this.y) * cosine;
+            let y = (p.x - this.x) * sine + (p.y - this.y) * cosine;
 
             p.x = x + this.x;
             p.y = y + this.y;
@@ -121,8 +121,8 @@ function loop() {
     context.strokeStyle = "#ffffff";
 
     cube.rotateY(0.01);
-    cube.rotateX(0.01);
-    //cube.rotateZ(0.01);
+    cube.rotateX(0.015);
+    cube.rotateZ(0.01);
 
     var vertices = project(cube.vertices, width, height);
 
