@@ -28,23 +28,6 @@ const Cube = function (x, y, z, size) {
 };
 
 Cube.prototype = {
-    rotateX: function (radian) {
-        var cosine = Math.cos(radian);
-        var sine = Math.sin(radian);
-       
-        for (let index = this.vertices.length - 1; index > -1; index--) {
-
-            let p = this.vertices[index];
-
-            let y = (p.y - this.y) * cosine - (p.z - this.z) * sine;
-            let z = (p.y - this.y) * sine + (p.z - this.z) * cosine;
-
-            p.y = y + this.y;
-            p.z = z + this.z;
-
-        }
-    },
-
     rotateY: function (radian) {
         var cosine = Math.cos(radian);
         var sine = Math.sin(radian);
@@ -52,9 +35,48 @@ Cube.prototype = {
         for (let index = this.vertices.length - 1; index > -1; index--) {
 
             let p = this.vertices[index];
+            let y;
+            let z;
 
-            let x = (p.z - this.z) * sine + (p.x - this.x) *  cosine;
-            let z = (p.z - this.z) * cosine - (p.x - this.x) * sine;
+            if (radian > 0) {
+                
+                y = (p.y - this.y) * cosine - (p.z - this.z) * sine;
+                z = (p.y - this.y) * sine + (p.z - this.z) * cosine;
+
+            } else {
+
+                y = (p.y - this.y) * cosine - (p.z - this.z) * sine;
+                z = (p.y - this.y) * sine + (p.z - this.z) * cosine;
+
+            }
+
+            p.y = y + this.y;
+            p.z = z + this.z;
+
+        }
+    },
+
+    rotateX: function (radian) {
+        var cosine = Math.cos(radian);
+        var sine = Math.sin(radian);
+       
+        for (let index = this.vertices.length - 1; index > -1; index--) {
+
+            let p = this.vertices[index];
+            let x;
+            let z;
+            if (radian >= 0) {
+
+                x = (p.z - this.z) * sine + (p.x - this.x) * cosine;
+                z = (p.z - this.z) * cosine - (p.x - this.x) * sine;
+
+            } else {
+                    
+                x = (p.z - this.z) * -sine + (p.x - this.x) *  -cosine;
+                z = (p.z - this.z) * -cosine - (p.x - this.x) * -sine;
+
+            }
+                
 
             p.x = x + this.x;
             p.z = z + this.z;
@@ -79,9 +101,9 @@ Cube.prototype = {
         }
     },
 }
-
-
-var context = document.querySelector("canvas").getContext("2d");
+var rotation = {};   
+var cnv = document.querySelector("canvas");
+var context = cnv.getContext("2d");
 
 var cube = new Cube(0, 0, 400, 200);
 
@@ -106,8 +128,7 @@ function project(points3d, width, height) {
 
 }
 
-function loop() {
-    window.requestAnimationFrame(loop);
+function loop(mouse) {
 
     var height = document.documentElement.clientHeight;
     var width = document.documentElement.clientWidth;
@@ -120,9 +141,22 @@ function loop() {
 
     context.strokeStyle = "#ffffff";
 
-    cube.rotateY(0.01);
-    cube.rotateX(0.015);
-    cube.rotateZ(0.01);
+    var zeroX = (mouse.x / width)/10 - 0.05;
+    var zeroY = (mouse.y / height)/10 - 0.05;
+
+
+    if (!Number.isNaN(zeroX)) {
+        rotation.x = zeroX;
+    }
+
+    if (!Number.isNaN(zeroY)) {
+        rotation.y = zeroY;
+    }
+
+    cube.rotateX(rotation.x);
+    cube.rotateY(rotation.y);
+    //cube.rotateX(0.005);
+    //cube.rotateZ(0.01);
 
     var vertices = project(cube.vertices, width, height);
 
@@ -141,4 +175,10 @@ function loop() {
 
 }
 
-loop();
+var mouse = {};
+cnv.addEventListener("mousemove", function (e) {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+    window.requestAnimationFrame(loop);
+    loop(mouse);
+});
