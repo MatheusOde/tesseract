@@ -37,8 +37,7 @@ Cube.prototype = {
             let p = this.vertices[index];
             let y;
             let z;
-
-            if (radian > 0) {
+            if (radian <= 0) {
                 
                 y = (p.y - this.y) * cosine - (p.z - this.z) * sine;
                 z = (p.y - this.y) * sine + (p.z - this.z) * cosine;
@@ -65,15 +64,15 @@ Cube.prototype = {
             let p = this.vertices[index];
             let x;
             let z;
-            if (radian >= 0) {
+            if (radian <= 0) {
 
-                x = (p.z - this.z) * sine + (p.x - this.x) * cosine;
-                z = (p.z - this.z) * cosine - (p.x - this.x) * sine;
+                x = (p.z - this.z) * -sine + (p.x - this.x) *  -cosine;
+                z = (p.z - this.z) * -cosine - (p.x - this.x) * -sine;
 
             } else {
                     
-                x = (p.z - this.z) * -sine + (p.x - this.x) *  -cosine;
-                z = (p.z - this.z) * -cosine - (p.x - this.x) * -sine;
+                x = (p.z - this.z) * sine + (p.x - this.x) * cosine;
+                z = (p.z - this.z) * cosine - (p.x - this.x) * sine;
 
             }
                 
@@ -94,7 +93,6 @@ Cube.prototype = {
 
             let x = (p.x - this.x) * cosine - (p.y - this.y) *  sine;
             let y = (p.x - this.x) * sine + (p.y - this.y) * cosine;
-
             p.x = x + this.x;
             p.y = y + this.y;
 
@@ -141,8 +139,8 @@ function loop(mouse) {
 
     context.strokeStyle = "#ffffff";
 
-    var zeroX = (mouse.x / width)/10 - 0.05;
-    var zeroY = (mouse.y / height)/10 - 0.05;
+    var zeroX = (mouse.x / width)*4 - 2;
+    var zeroY = (mouse.y / height)*4- 2;
 
 
     if (!Number.isNaN(zeroX)) {
@@ -172,6 +170,8 @@ function loop(mouse) {
         context.closePath();
         context.stroke();
     }
+
+    cube = new Cube(0, 0, 400, 200);
 
 }
 
