@@ -176,9 +176,16 @@ function loop(mouse) {
 }
 
 var mouse = {};
+var start = new Date();
 cnv.addEventListener("mousemove", function (e) {
+    var elapsed = new Date() - start;
+    if (elapsed < 1000/30) {
+        window.requestAnimationFrame(loop);
+        return;
+    }
     mouse.x = e.clientX;
     mouse.y = e.clientY;
-    window.requestAnimationFrame(loop);
     loop(mouse);
+    window.requestAnimationFrame(loop);
+    start = new Date();
 });
