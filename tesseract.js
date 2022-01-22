@@ -9,16 +9,53 @@ const Point3D = function (x, y, z) {
     this.z = z;
 };
 
+const Point4D = function (x, y, z, w) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+    this.w = w;
+}
+
+const Tesseract = function (x, y, z, w, size) {
+
+    size *= 1;
+
+    Point4D.call(this, x, y, z, w);
+
+    this.vertices = [
+    new Point4D(x - size, y - size, z - size, w - size),
+    new Point4D(x + size, y - size, z - size, w - size),
+    new Point4D(x + size, y + size, z - size, w - size),
+    new Point4D(x - size, y + size, z - size, w - size),
+    new Point4D(x - size, y - size, z + size, w - size),
+    new Point4D(x + size, y - size, z + size, w - size),
+    new Point4D(x + size, y + size, z + size, w - size),
+    new Point4D(x - size, y + size, z + size, w - size),
+    
+    new Point4D(x - size, y - size, z - size, w + size),
+    new Point4D(x + size, y - size, z - size, w + size),
+    new Point4D(x + size, y + size, z - size, w + size),
+    new Point4D(x - size, y + size, z - size, w + size),
+    new Point4D(x - size, y - size, z + size, w + size),
+    new Point4D(x + size, y - size, z + size, w + size),
+    new Point4D(x + size, y + size, z + size, w + size),
+    new Point4D(x - size, y + size, z + size, w + size),];
+    
+    this.faces = [[0, 1, 2, 3], [0, 4, 5, 1], [1, 5, 6, 2], [3, 2, 6, 7], [0, 3, 7, 4], [4, 7, 6, 5]]
+}
+
 const Cube = function (x, y, z, size) {
 
-    size *= 0.5;
+    size *= 1;
 
     Point3D.call(this, x, y, z);
 
-    this.vertices = [new Point3D(x - size, y - size, z - size),
+    this.vertices = [
+    new Point3D(x - size, y - size, z - size),
     new Point3D(x + size, y - size, z - size),
     new Point3D(x + size, y + size, z - size),
     new Point3D(x - size, y + size, z - size),
+    
     new Point3D(x - size, y - size, z + size),
     new Point3D(x + size, y - size, z + size),
     new Point3D(x + size, y + size, z + size),
@@ -28,6 +65,58 @@ const Cube = function (x, y, z, size) {
 };
 
 Cube.prototype = {
+    rotateY: function (radian) {
+        var cosine = Math.cos(radian);
+        var sine = Math.sin(radian);
+       
+        for (let index = this.vertices.length - 1; index > -1; index--) {
+
+            let p = this.vertices[index];
+            let y;
+            let z;
+            y = (p.y - this.y) * cosine - (p.z - this.z) * sine;
+            z = (p.y - this.y) * sine + (p.z - this.z) * cosine;
+            p.y = y + this.y;
+            p.z = z + this.z;
+
+        }
+    },
+
+    rotateX: function (radian) {
+        var cosine = Math.cos(radian);
+        var sine = Math.sin(radian);
+       
+        for (let index = this.vertices.length - 1; index > -1; index--) {
+
+            let p = this.vertices[index];
+            let x;
+            let z;
+            x = (p.z - this.z) * sine + (p.x - this.x) * cosine;
+            z = (p.z - this.z) * cosine - (p.x - this.x) * sine;
+            p.x = (x + this.x)*-1;
+            p.z = z + this.z;
+
+        }
+    },
+
+    rotateZ: function (radian) {
+        var cosine = Math.cos(radian);
+        var sine = Math.sin(radian);
+       
+        for (let index = this.vertices.length - 1; index > -1; index--) {
+
+            let p = this.vertices[index];
+
+            let x = (p.x - this.x) * cosine - (p.y - this.y) *  sine;
+            let y = (p.x - this.x) * sine + (p.y - this.y) * cosine;
+            p.x = x + this.x;
+            p.y = y + this.y;
+
+        }
+    },
+}
+
+Tesseract.prototype = {
     rotateY: function (radian) {
         var cosine = Math.cos(radian);
         var sine = Math.sin(radian);
@@ -99,6 +188,7 @@ Cube.prototype = {
         }
     },
 }
+
 var rotation = {};   
 var cnv = document.querySelector("canvas");
 var context = cnv.getContext("2d");
@@ -109,7 +199,7 @@ function project(points3d, width, height) {
     
     var points2d = new Array(points3d.length);
 
-    var focal_length = 200;
+    var focal_length = 400;
 
     for (let index = points3d.length - 1; index > -1; index--) {
 
@@ -126,6 +216,29 @@ function project(points3d, width, height) {
 
 }
 
+function project4d(points4d, width, height, depth) {
+    
+    var points3d = new Array(points4d.length);
+
+    var focal_length = 400;
+
+    for (let index = points4d.length - 1; index > -1; index--) {
+
+        let p = points4d[index];
+
+        let x = p.x * (focal_length / p.w) + width * 0.5;
+        let y = p.y * (focal_length / p.w) + height * 0.5;
+        let z = p.z * (focal_length / p.w) + depth * 0.5;
+
+    points3d[index] = new Point3D(x, y, z); 
+
+    }
+
+    return points3d;
+
+}
+
+
 function loop(mouse) {
 
     var height = document.documentElement.clientHeight;
@@ -140,7 +253,7 @@ function loop(mouse) {
     context.strokeStyle = "#ffffff";
 
     var zeroX = (mouse.x / width)*4 - 2;
-    var zeroY = (mouse.y / height)*4- 2;
+    var zeroY = (mouse.y / height) * 4 - 2;
 
 
     if (!Number.isNaN(zeroX)) {
@@ -153,8 +266,6 @@ function loop(mouse) {
 
     cube.rotateX(rotation.x);
     cube.rotateY(rotation.y);
-    //cube.rotateX(0.005);
-    //cube.rotateZ(0.01);
 
     var vertices = project(cube.vertices, width, height);
 
@@ -177,6 +288,7 @@ function loop(mouse) {
 
 var mouse = {};
 var start = new Date();
+
 cnv.addEventListener("mousemove", function (e) {
     var elapsed = new Date() - start;
     if (elapsed < 1000/30) {
